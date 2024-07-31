@@ -22,25 +22,27 @@ export const getAutoUserInfo = () => {
 		let userInfo = getLocalUserInfo();
 		if (!userInfo) {
 			getCurrentUserInfo().then(cu => {
-				if (!cu.nickName) {
-					uni.showModal({
-						title: '登录',
-						content: '请接受授权获取您的微信昵称、头像、地区信息自动为您注册账户',
-						success: function(res) {
-							if (res.confirm) {
-								console.log('用户点击确定');
-								getCurrentUserInfo().then(res2 => {
-									console.log("获取成功", res2);
-									setLocalUserInfo(res2);
-									resovle(res2);
-								})
-							} else if (res.cancel) {
-								console.log('用户点击取消');
-								reject(null);
-							}
-						}
-					});
-				}
+				setLocalUserInfo(cu);
+				resovle(cu);
+				// if (!cu.nickName) {
+				// uni.showModal({
+				// 	title: '登录',
+				// 	content: '请接受授权获取您的微信昵称、头像、地区信息自动为您注册账户',
+				// 	success: function(res) {
+				// 		if (res.confirm) {
+				// 			console.log('用户点击确定');
+				// 			getCurrentUserInfo().then(res2 => {
+				// 				console.log("获取成功", res2);
+				// 				setLocalUserInfo(res2);
+				// 				resovle(res2);
+				// 			})
+				// 		} else if (res.cancel) {
+				// 			console.log('用户点击取消');
+				// 			reject(null);
+				// 		}
+				// 	}
+				// });
+				// }
 			}).catch(e => reject(e));
 		} else {
 			resovle(userInfo);

@@ -1,5 +1,16 @@
-import {removeLocalUserInfo} from "./userinfo.js"
-const base_url = "https://wx.saisaiwa.com";
+import {
+	removeLocalUserInfo
+} from "./userinfo.js"
+
+export const base_url = "https://wx.saisaiwa.com";
+
+
+/**
+ * 返回图片拼接路径
+ */
+export const getImagePath = (key) => {
+	return base_url + "/img?key=" + key;
+}
 
 /**
  * 返回Token
@@ -11,6 +22,32 @@ function get_token() {
 		console.error(e);
 		return "";
 	}
+}
+
+
+/**
+ * 检查Token的有效期
+ */
+export const checkToken = () => {
+	let token = get_token();
+	if (!token || token == "") {
+		return false;
+	}
+	let expireTime = uni.getStorageSync('token-exprie-time');
+	if (!expireTime || expireTime < Date.now()) {
+		return false;
+	}
+	return true;
+}
+
+function getTimestampWithSeconds(seconds) {
+	// 获取当前时间戳 (毫秒)
+	const currentTime = Date.now();
+	// 将秒数转换为毫秒
+	const secondsInMillis = seconds * 1000;
+	// 累加秒数到当前时间戳
+	const newTimestamp = currentTime + secondsInMillis;
+	return newTimestamp;
 }
 
 const baseRequest = (url, data, method) => {
@@ -28,7 +65,10 @@ const baseRequest = (url, data, method) => {
 					//重新登录
 					uni.removeStorageSync('token');
 					removeLocalUserInfo();
-					login();
+					console.log("token过期调整登录页",res.data.msg)
+					uni.reLaunch({
+						url: '/pages/login/login'
+					});
 					reject(res.data.msg);
 				} else if (code == 200) {
 					resolve(res.data.data);
@@ -80,9 +120,9 @@ export const loginWx = () => {
  */
 export const sysLogin = (code) => {
 	return new Promise((resovle, reject) => {
-		get("/wx/user/login", {
+		baseRequest("/wx/user/login", {
 			code
-		}).then((res) => {
+		}, "GET").then((res) => {
 			resovle(res);
 		}).catch((e) => {
 			reject(e);
@@ -97,6 +137,8 @@ export const login = () => {
 			sysLogin(code).then((user) => {
 				console.log("登录成功:", user);
 				uni.setStorageSync('token', user.token);
+				uni.setStorageSync('token-exprie-time',
+					getTimestampWithSeconds(user.expireTime));
 				resovle(user);
 			}).catch(e => reject(e));
 		}).catch(e => {

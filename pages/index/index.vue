@@ -1,61 +1,159 @@
 <template>
 	<view class="content">
-		<uni-swiper-dot :info="info" :current="current" field="content" mode="nav">
-			<swiper class="swiper-box" @change="change">
-				<swiper-item v-for="(item ,index) in info" :key="index">
-					<image class="swiper-item" src="http://imgapi.xl0408.top/index.php" mode="aspectFill"></image>
-				</swiper-item>
-			</swiper>
-		</uni-swiper-dot>
+
+		<!-- <z-swiper class="mswiper" v-model="state.swiper" :options="options">
+			<z-swiper-item class="mswiper-item" v-for="(item,index) in state.swiper" :key="index">
+				<image class="mswiper-item" :src="getImagePath(item.cover)" mode="aspectFill"> </image>
+			</z-swiper-item>
+		</z-swiper>
+
+		<scroll-view class="list-container" :scroll-top="state.scrollTop" scroll-y="true" @scrolltolower="scrollEnd"
+			lower-threshold="100">
+			<view v-for="(item ,index) in state.dataList" :key="index">
+				<article-list :data="item"></article-list>
+			</view>
+		</scroll-view> -->
 
 
+		<z-paging ref="paging" v-model="state.dataList" @query="queryList" auto-show-back-to-top>
+			<!-- z-paging默认铺满全屏，此时页面所有view都应放在z-paging标签内，否则会被盖住 -->
+			<!-- 需要固定在页面顶部的view请通过slot="top"插入，包括自定义的导航栏 -->
+			<view v-for="(item ,index) in state.dataList" :key="index">
+				<article-list :data="item"></article-list>
+			</view>
+			<template slot="top">
+				<z-swiper class="mswiper" v-model="state.swiper" :options="options">
+					<z-swiper-item class="mswiper-item" v-for="(item,index) in state.swiper" :key="index">
+						<image class="mswiper-item" :src="getImagePath(item.cover)" mode="aspectFill"></image>
+					</z-swiper-item>
+				</z-swiper>
+			</template>
+		</z-paging>
+
+		<!-- <uni-icons v-if="state.total>0" @click="setScrollTop" class="top-btn" type="up" size="30"></uni-icons> -->
 	</view>
 </template>
 
-<script>
+<script setup>
 	import {
-		getAutoUserInfo
-	} from "../../util/userinfo.js"
-	export default {
-		data() {
-			return {
-				info: [{
-					content: '内容 A'
-				}, {
-					content: '内容 B'
-				}, {
-					content: '内容 C'
-				}],
-				current: 0,
-			}
+		checkToken,
+		get,
+		getImagePath
+	} from "@/util/api.js";
+
+	import {
+		onLoad,
+		onShow
+	} from "@dcloudio/uni-app";
+
+	import {
+		reactive,
+		ref
+	} from "vue"
+
+	const paging = ref(null)
+
+	const options = reactive({
+		height: 20,
+		// swiperItemWidth: "100%",
+		swiperItemHeight: 300,
+		loop: true,
+		effect: 'coverflow',
+		centeredSlides: true,
+		slidesPerView: 'auto',
+		coverflowEffect: {
+			rotate: 50,
+			stretch: 0,
+			depth: 100,
+			modifier: 1,
+			slideShadows: true,
 		},
-		onLoad() {
-			getAutoUserInfo().then(res => {
-				console.log(res)
-			})
-		},
-		methods: {
-			change(e) {
-				this.current = e.detail.current;
-			}
-		}
+	})
+
+
+	const state = reactive({
+		swiper: [],
+		scrollTop: 0,
+
+		pageIndex: 1,
+		pageSize: 10,
+		dataList: [],
+		sortType: 0,
+		status: -1,
+		total: 0,
+		loading: false
+	})
+
+	onLoad(() => {
+		state.current = 1;
+		state.dataList = [];
+		requestArticle();
+	})
+
+	const requestArticle = () => {
+		state.loading = true;
+		get("/article/page-list", {
+			size: state.pageSize,
+			current: state.pageIndex,
+			sortType: state.sortType,
+			status: state.status
+		}).then(res => {
+			state.total = res.total;
+			state.dataList.push(...res.rows);
+			state.dataList.push(...res.rows);
+			state.dataList.push(...res.rows);
+			state.loading = false;
+			state.swiper = state.dataList.slice(0, 3);
+			console.log("DataList: ", state.dataList);
+			paging.completeByTotal(state.dataList, res.total);
+		})
+	}
+
+
+	const queryList = (pageNo, pageSize) => {
+		state.pageIndex = pageNo;
+		state.pageSize = pageSize;
+		requestArticle();
+	}
+
+	const scrollEnd = () => {
+		console.log("滚动到底部")
+	}
+
+	const setScrollTop = () => {
+		console.log("setScrollTop", state.scrollTop);
+		state.scrollTop = 0;
 	}
 </script>
 
 <style lang="scss">
 	.content {
-		min-height: 100%;
-		/* display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center; */
+		height: 100%;
+		position: relative;
+		overflow: hidden;
 	}
 
-	.swiper-box {
-		height: 30%;
+	.mswiper {
+		height: 300rpx;
+	}
 
-		.swiper-item {
-			width: 100%;
-		}
+	.mswiper-item {
+		width: 100%;
+		height: 300rpx;
+	}
+
+	.list-container {
+		height: 950rpx;
+	}
+
+	.top-btn {
+		padding: 8rpx;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+		border-color: black;
+		border-radius: $uni-border-radius-circle;
+		background-color: white;
+		position: absolute;
+		right: 15rpx;
+		bottom: calc(var(--status-bar-height) + 20rpx);
 	}
 </style>
