@@ -105,7 +105,10 @@
 			state.loading = false;
 			state.swiper = state.dataList.slice(0, 3);
 			console.log("DataList: ", state.dataList);
-			paging.completeByTotal(state.dataList, res.total);
+			paging.value.complete(res.rows)
+		}).catch(e => {
+			console.log("获取列表失败", e);
+			paging.value.complete(false);
 		})
 	}
 
