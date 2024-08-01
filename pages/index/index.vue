@@ -1,36 +1,23 @@
 <template>
 	<view class="content">
-
-		<!-- <z-swiper class="mswiper" v-model="state.swiper" :options="options">
-			<z-swiper-item class="mswiper-item" v-for="(item,index) in state.swiper" :key="index">
-				<image class="mswiper-item" :src="getImagePath(item.cover)" mode="aspectFill"> </image>
-			</z-swiper-item>
-		</z-swiper>
-
-		<scroll-view class="list-container" :scroll-top="state.scrollTop" scroll-y="true" @scrolltolower="scrollEnd"
-			lower-threshold="100">
+		<z-paging ref="paging" v-model="state.dataList" @query="queryList" auto-show-back-to-top
+			lower-threshold="200rpx" @scrolltolower="onScrolltolower" show-scrollbar="false">
 			<view v-for="(item ,index) in state.dataList" :key="index">
-				<article-list :data="item"></article-list>
+				<article-list :data="item" :hot="index < 3"></article-list>
 			</view>
-		</scroll-view> -->
-
-
-		<z-paging ref="paging" v-model="state.dataList" @query="queryList" auto-show-back-to-top>
-			<!-- z-paging默认铺满全屏，此时页面所有view都应放在z-paging标签内，否则会被盖住 -->
-			<!-- 需要固定在页面顶部的view请通过slot="top"插入，包括自定义的导航栏 -->
-			<view v-for="(item ,index) in state.dataList" :key="index">
-				<article-list :data="item"></article-list>
-			</view>
-			<template slot="top">
-				<z-swiper class="mswiper" v-model="state.swiper" :options="options">
-					<z-swiper-item class="mswiper-item" v-for="(item,index) in state.swiper" :key="index">
-						<image class="mswiper-item" :src="getImagePath(item.cover)" mode="aspectFill"></image>
-					</z-swiper-item>
-				</z-swiper>
+			<template #top>
+				<view>
+					<z-swiper class="mswiper" v-model="state.swiper" :options="options">
+						<z-swiper-item class="mswiper-item" v-for="(item,index) in state.swiper" :key="index">
+							<view class="mswiper-content">
+								<image :src="item.img" mode="aspectFit"></image>
+								<view class="mswiper-title-text">{{item.title}}</view>
+							</view>
+						</z-swiper-item>
+					</z-swiper>
+				</view>
 			</template>
 		</z-paging>
-
-		<!-- <uni-icons v-if="state.total>0" @click="setScrollTop" class="top-btn" type="up" size="30"></uni-icons> -->
 	</view>
 </template>
 
@@ -54,13 +41,13 @@
 	const paging = ref(null)
 
 	const options = reactive({
-		height: 20,
-		// swiperItemWidth: "100%",
-		swiperItemHeight: 300,
-		loop: true,
-		effect: 'coverflow',
-		centeredSlides: true,
+		autoplay: true,
 		slidesPerView: 'auto',
+		loopedSlides: 5,
+		disableOnInteraction: false,
+		loop: true,
+		centeredSlides: true,
+		effect: 'coverflow',
 		coverflowEffect: {
 			rotate: 50,
 			stretch: 0,
@@ -72,9 +59,15 @@
 
 
 	const state = reactive({
-		swiper: [],
-		scrollTop: 0,
-
+		swiper: [{
+				img: "/static/swiper/sw_1.png",
+				title: "贡献天马行空的创意想法"
+			},
+			{
+				img: "/static/swiper/sw_2.gif",
+				title: "2024星火计划"
+			}
+		],
 		pageIndex: 1,
 		pageSize: 10,
 		dataList: [],
@@ -99,16 +92,12 @@
 			status: state.status
 		}).then(res => {
 			state.total = res.total;
-			state.dataList.push(...res.rows);
-			state.dataList.push(...res.rows);
-			state.dataList.push(...res.rows);
 			state.loading = false;
-			state.swiper = state.dataList.slice(0, 3);
-			console.log("DataList: ", state.dataList);
-			paging.value.complete(res.rows)
+			paging.value.complete(res.rows, true);
 		}).catch(e => {
 			console.log("获取列表失败", e);
 			paging.value.complete(false);
+			state.loading = false;
 		})
 	}
 
@@ -116,16 +105,14 @@
 	const queryList = (pageNo, pageSize) => {
 		state.pageIndex = pageNo;
 		state.pageSize = pageSize;
+		if (pageNo == 1) {
+			state.dataList.length = 0;
+		}
 		requestArticle();
 	}
 
-	const scrollEnd = () => {
+	const onScrolltolower = (source) => {
 		console.log("滚动到底部")
-	}
-
-	const setScrollTop = () => {
-		console.log("setScrollTop", state.scrollTop);
-		state.scrollTop = 0;
 	}
 </script>
 
@@ -137,16 +124,32 @@
 	}
 
 	.mswiper {
-		height: 300rpx;
+		height: 200rpx;
 	}
 
 	.mswiper-item {
 		width: 100%;
-		height: 300rpx;
+		height: 200rpx;
 	}
 
-	.list-container {
-		height: 950rpx;
+	.mswiper-content {
+		position: relative;
+
+		image {
+			width: 100%;
+		}
+	}
+
+	.mswiper-title-text {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		padding: 15rpx 10rpx;
+		background-color: rgb(44 44 44 / 65%);
+		font-size: 25rpx;
+		color: white;
+		text-overflow: ellipsis;
+		right: 0;
 	}
 
 	.top-btn {

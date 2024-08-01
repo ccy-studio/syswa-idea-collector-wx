@@ -1,10 +1,25 @@
 <template>
 	<view>
 		<view class="a-container" @click="onClick">
-			<image class="img" lazy-load :src="getImagePath(props.data.cover)" mode="aspectFill"></image>
+			<view class="img-content">
+				<view class="hot" v-if="props.hot">
+					<uni-icons color="red" type="fire" size="25"></uni-icons>
+				</view>
+				<image class="img" lazy-load :src="getImagePath(props.data.cover)" mode="aspectFill"></image>
+			</view>
 			<view class="left-body">
 				<view class="title">{{props.data.title}}</view>
 				<view class="flex-all"></view>
+				<view class="tip-text">
+					<view v-if="props.data.status == 1">
+						<uni-icons type="circle" size="12"></uni-icons>
+						<text>已结束</text>
+					</view>
+					<view v-else>
+						<uni-icons type="circle-filled" color="orangered" size="12"></uni-icons>
+						<text class="text-red">进行中</text>
+					</view>
+				</view>
 				<view class="tip-text">{{props.data.userNickName}} - {{props.data.createTime}}</view>
 				<view class="rows">
 					<view class="tip-text">阅读: {{props.data.see}}</view>
@@ -30,6 +45,11 @@
 		data: {
 			type: Object,
 			required: true,
+		},
+		hot: {
+			type: Boolean,
+			required: false,
+			default: false
 		}
 	});
 
@@ -38,27 +58,10 @@
 	});
 
 	const onClick = () => {
-		console.log("点击事件");
+		uni.navigateTo({
+			url: "/pages/article/article?id=" + props.data.id + "&title=" + props.data.title,
+		})
 	}
-
-
-	// export default {
-	// 	name: "article-list",
-	// 	prors: {
-	// 		data: {
-	// 			type: Object,
-	// 			required: true,
-	// 		}
-	// 	},
-	// 	data() {
-	// 		return {
-
-	// 		};
-	// 	},
-	// 	methods: {
-
-	// 	}
-	// }
 </script>
 
 <style lang="scss">
@@ -67,11 +70,6 @@
 		flex-direction: row;
 		justify-content: space-between;
 		padding: 20rpx;
-	}
-
-	.img {
-		flex: 1;
-		height: 250rpx;
 	}
 
 	.rows {
@@ -107,6 +105,31 @@
 			color: #909399;
 			font-size: 22rpx;
 			padding: 0rpx 10rpx;
+		}
+	}
+
+	.text-red {
+		color: orangered;
+	}
+
+	.img-content {
+		flex: 1;
+		height: 250rpx;
+		position: relative;
+		border-radius: 15rpx;
+
+		.hot {
+			position: absolute;
+			top: 0;
+			left: 0;
+			border-radius: 20%;
+			background-color: #fff
+		}
+
+		.img {
+			height: 250rpx;
+			width: 100% !important;
+			border-radius: 15rpx;
 		}
 	}
 </style>
