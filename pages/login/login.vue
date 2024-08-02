@@ -1,7 +1,7 @@
 <template>
 	<view class="conatiner">
 		<image class="logo" src="@/static/logo.png"></image>
-		<button class="btn" @click="onLoginClick" size="default">微信一键登录</button>
+		<button v-if="state.isLogin" class="btn" @click="onLoginClick" size="default">微信一键登录</button>
 	</view>
 </template>
 
@@ -17,27 +17,42 @@
 		getAutoUserInfo
 	} from "@/util/userinfo.js"
 
+	import {
+		onLoad,
+		onShow
+	} from "@dcloudio/uni-app";
+
+	const state = reactive({
+		isLogin: false
+	})
+
+	onLoad(() => {
+		login().then(res => {
+			state.isLogin = true;
+		}).catch(e => {
+			console.error("登录失败", e);
+			uni.showToast({
+				title: "登录失败"
+			})
+		}).finally(() => {
+			uni.hideLoading();
+		})
+	})
+
 	const onLoginClick = () => {
 		uni.showLoading({
 			title: "登录中..."
 		})
-		console.log("点击事件");
-		login().then(res => {
-			//获取用户信息
-			getAutoUserInfo().then(rr => {
-				console.log("用户信息获取成功:", rr);
-				//跳转INDEX页面
-				uni.reLaunch({
-					url: '/pages/index/index'
-				});
-			}).catch(ee => {
-				console.log("用户信息获取失败");
-				uni.showToast({
-					title: "登录失败"
-				})
-			})
-		}).catch(e => {
-			console.error("登录失败", e);
+
+		//获取用户信息
+		getAutoUserInfo().then(rr => {
+			console.log("用户信息获取成功:", rr);
+			//跳转INDEX页面
+			uni.reLaunch({
+				url: '/pages/index/index'
+			});
+		}).catch(ee => {
+			console.log("用户信息获取失败");
 			uni.showToast({
 				title: "登录失败"
 			})

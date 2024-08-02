@@ -2,7 +2,7 @@
 	<view class="content">
 		<view v-if="props.showTitle" class="title" v-text="props.data.title"></view>
 		<view v-if="props.showAbout" class="about">
-			<image class="img" mode="aspectFill" :src="getImagePath(props.data.cover)"></image>
+			<image @click="onClickCover" class="img" mode="aspectFill" :src="getImagePath(props.data.cover)"></image>
 			<view class="right-content">
 				<text>作者： {{props.data.userNickName}}</text>
 				<text>发布时间： {{props.data.createTime}}</text>
@@ -44,6 +44,8 @@
 		getImagePath
 	} from "@/util/api.js"
 
+	const emits = defineEmits(["onClickCover"])
+
 	const props = defineProps({
 		data: {
 			type: Object,
@@ -68,6 +70,10 @@
 	const isHtml = () => {
 		const regex = /<([A-Za-z][A-Za-z0-9]*)\b[^>]*>(.*?)<\/\1>/;
 		return regex.test(props.data.content);
+	}
+
+	const onClickCover = () => {
+		emits('onClickCover', props.data.cover)
 	}
 </script>
 

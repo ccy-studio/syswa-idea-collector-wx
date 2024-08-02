@@ -81,7 +81,9 @@
 	}
 
 	const onCreateIdea = () => {
-
+		uni.navigateTo({
+			url: '/pages/create/create'
+		});
 	}
 </script>
 
@@ -93,6 +95,7 @@
 			align-items: center;
 
 			.nick-name {
+				margin-top: 25rpx;
 				font-size: 35rpx;
 				color: #3a3a3a;
 				font-weight: 600;
@@ -100,8 +103,8 @@
 
 			.head {
 				border-radius: 20%;
-				height: 250rpx;
-				width: 250rpx;
+				height: 200rpx;
+				width: 200rpx;
 			}
 		}
 

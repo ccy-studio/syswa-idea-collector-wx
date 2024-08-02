@@ -21,6 +21,9 @@
 			"style": {
 				"navigationBarTitleText": "登录"
 			}
+		},
+		{
+			"path": "pages/create/create"
 		}
 	],
 	"tabBar": {

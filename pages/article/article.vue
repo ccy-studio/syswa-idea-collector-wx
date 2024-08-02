@@ -3,20 +3,26 @@
 		<z-paging ref="paging" v-model="state.comment.list" @query="getComment" auto-show-back-to-top
 			lower-threshold="200rpx" :safe-area-inset-bottom="true" :use-safe-area-placeholder="true"
 			:show-scrollbar="false" :refresher-enabled="false">
-			<article-content :data="state.data" :showTitle="true" :showAbout="true"></article-content>
+			<article-content @onClickCover="onClickCover" :data="state.data" :showTitle="true"
+				:showAbout="true"></article-content>
 
 			<view class="p-stat-operate">
-				<uni-badge size="small" :text="state.isGive?'+1':''" absolute="rightTop" type="primary">
+				<uni-badge v-if="state.data.userId !=  state.userInfo.id" size="small" :text="state.isGive?'+1':''"
+					absolute="rightTop" type="primary">
 					<view @click="give" class="stat-operate">
 						<uni-icons type="hand-up-filled" size="30" color="red"></uni-icons>
-						<text>给作者点赞</text>
+						<text class="give-text">给作者点赞</text>
 					</view>
 				</uni-badge>
+				<button v-if="state.data.userId ==  state.userInfo.id && state.data.status == 0"
+					style="margin: 0 20rpx;" type="primary" size="mini" @click="onCickEdit">编辑</button>
+				<button v-if="state.data.userId ==  state.userInfo.id && state.data.status == 0" style="margin: 0;"
+					type="primary" size="mini" @click="onClickCloseIdea">结束话题</button>
 			</view>
 
 			<uni-section title="用户评论" type="line">
 				<view class="comment-item" v-for="(item ,index) in state.comment.list" :key="index">
-					<article-comment @onReply="onReply" :obj="item"></article-comment>
+					<article-comment @onGive="onCommentGive" @onReply="onReply" :obj="item"></article-comment>
 					<view class="comment-item-seconds" v-if="item.childComment.length != 0">
 						<article-comment v-for="(item2,index2) in item.childComment" :key="item2.id" @onReply="onReply"
 							@onGive="onCommentGive" :obj="item2" :authorId="state.data.userId"></article-comment>
@@ -33,8 +39,8 @@
 				</view>
 			</template>
 		</z-paging>
-		<uni-fab ref="fab" :pattern="fabConfig.pattern" :content="fabConfig.content" horizontal="right"
-			vertical="bottom" direction="vertical" @trigger="fabTrigger" />
+
+		<q-previewImage ref="previewImage" :urls="[getImagePath(state.data.cover)]"></q-previewImage>
 	</view>
 </template>
 
@@ -54,24 +60,18 @@
 
 	import {
 		get,
+		getImagePath,
 		post
 	} from "@/util/api.js"
 
+	import {
+		getAutoUserInfo
+	} from "@/util/userinfo.js"
+
 	const paging = ref(null)
 
-	const fab = ref(null)
+	const previewImage = ref(null)
 
-	const fabConfig = {
-		pattern: {
-			color: "#3c3e49",
-			icon: "plusempty",
-			selectedColor: "#007AFF"
-		},
-		content: [{
-			iconPath: "",
-			text: ""
-		}]
-	}
 
 	const state = reactive({
 		id: null,
@@ -92,7 +92,8 @@
 			text: "",
 			parentId: null,
 			parentUserName: null
-		}
+		},
+		userInfo: {}
 	})
 
 	onLoad((option) => {
@@ -101,6 +102,11 @@
 		uni.setNavigationBarTitle({
 			title: state.title
 		});
+
+		getAutoUserInfo().then(res => {
+			state.userInfo = res;
+		})
+
 		get("/article/get/" + state.id)
 			.then(res => {
 				state.data = res;
@@ -148,7 +154,6 @@
 	}
 
 	const onSubmitComment = () => {
-		console.log("onSubmitComment")
 		if (state.edit.text.length == 0) {
 			return;
 		}
@@ -191,17 +196,36 @@
 		state.edit.focus = false;
 	}
 
+	const onCickEdit = () => {
+		uni.navigateTo({
+			url: '/pages/create/create?id=' + state.id
+		});
+	}
 
-	const fabTrigger = (item) => {
+	const onClickCloseIdea = () => {
+		get("/article/close", {
+			id: state.id
+		}).then(res => {
+			state.data.status = 1
+			uni.showToast({
+				title: "操作成功",
+				position: "bottom"
+			})
+		})
+	}
 
+	const onClickCover = (url) => {
+		let path = getImagePath(url);
+		previewImage.value.open(path);
 	}
 </script>
 
 <style lang="scss" scoped>
 	.p-stat-operate {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		align-items: center;
+		justify-content: center;
 		margin-bottom: 50rpx;
 		margin-top: 20rpx;
 	}
@@ -213,7 +237,7 @@
 		justify-content: space-between;
 		align-items: center;
 
-		text {
+		.give-text {
 			font-size: 25rpx;
 			color: orangered;
 		}

@@ -1,7 +1,16 @@
 <template>
 	<view class="content">
 		<z-paging ref="paging" v-model="state.dataList" @query="queryList" auto-show-back-to-top
-			lower-threshold="200rpx" @scrolltolower="onScrolltolower" :show-scrollbar="false">
+			lower-threshold="200rpx" :show-scrollbar="false">
+
+			<view class="select">
+				<uni-data-select class="select-item" :clear="false" v-model="state.sortType" label="排序"
+					:localdata="selectSort" @change="onSelectChange"></uni-data-select>
+				<uni-data-select class="select-item" :clear="false" v-model="state.status" label="状态"
+					:localdata="selectStatus" @change="onSelectChange"></uni-data-select>
+			</view>
+
+
 			<view v-for="(item ,index) in state.dataList" :key="index">
 				<article-list :data="item" :hot="index < 3"></article-list>
 			</view>
@@ -57,6 +66,34 @@
 		},
 	})
 
+	const selectStatus = [{
+			value: 0,
+			text: "进行中"
+		},
+		{
+			value: 1,
+			text: "已结束"
+		},
+		{
+			value: -1,
+			text: "全部"
+		},
+	]
+
+	const selectSort = [{
+			value: 0,
+			text: "综合"
+		},
+		{
+			value: 1,
+			text: "点赞"
+		},
+		{
+			value: 2,
+			text: "时间"
+		},
+	]
+
 
 	const state = reactive({
 		swiper: [{
@@ -111,8 +148,8 @@
 		requestArticle();
 	}
 
-	const onScrolltolower = (source) => {
-		console.log("滚动到底部")
+	const onSelectChange = (e) => {
+		paging.value.reload()
 	}
 </script>
 
@@ -121,6 +158,18 @@
 		height: 100%;
 		position: relative;
 		overflow: hidden;
+	}
+
+	.select {
+		display: flex;
+		flex-direction: row;
+		justify-content: start;
+		margin: 20rpx;
+
+		.select-item {
+			margin-right: 20rpx;
+			width: 200rpx;
+		}
 	}
 
 	.mswiper-item {

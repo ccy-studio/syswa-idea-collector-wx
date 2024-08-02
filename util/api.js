@@ -65,7 +65,7 @@ const baseRequest = (url, data, method) => {
 					//重新登录
 					uni.removeStorageSync('token');
 					removeLocalUserInfo();
-					console.log("token过期调整登录页",res.data.msg)
+					console.log("token过期调整登录页", res.data.msg)
 					uni.reLaunch({
 						url: '/pages/login/login'
 					});
@@ -178,4 +178,29 @@ export const getCurrentUserInfo = () => {
 			}
 		}).catch(e => reject(e));
 	});
+}
+
+
+export const uploadImage = (filepath) => {
+	return new Promise((resovle, reject) => {
+		uni.uploadFile({
+			url: base_url + "/img/upload",
+			filePath: filepath,
+			name: 'file',
+			header: {
+				'Authorization': get_token()
+			},
+			success: (uploadFileRes) => {
+				let json = JSON.parse(uploadFileRes.data);
+				if (json.code == 200) {
+					resovle(json.data)
+				} else {
+					reject(json.msg);
+				}
+			},
+			fail: (e) => {
+				reject(e);
+			}
+		});
+	})
 }
