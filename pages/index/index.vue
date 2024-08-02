@@ -1,16 +1,16 @@
 <template>
 	<view class="content">
 		<z-paging ref="paging" v-model="state.dataList" @query="queryList" auto-show-back-to-top
-			lower-threshold="200rpx" @scrolltolower="onScrolltolower" show-scrollbar="false">
+			lower-threshold="200rpx" @scrolltolower="onScrolltolower" :show-scrollbar="false">
 			<view v-for="(item ,index) in state.dataList" :key="index">
 				<article-list :data="item" :hot="index < 3"></article-list>
 			</view>
 			<template #top>
 				<view>
-					<z-swiper class="mswiper" v-model="state.swiper" :options="options">
+					<z-swiper v-model="state.swiper" :options="options">
 						<z-swiper-item class="mswiper-item" v-for="(item,index) in state.swiper" :key="index">
 							<view class="mswiper-content">
-								<image :src="item.img" mode="aspectFit"></image>
+								<image :src="item.img" mode="aspectFill"></image>
 								<view class="mswiper-title-text">{{item.title}}</view>
 							</view>
 						</z-swiper-item>
@@ -116,20 +116,15 @@
 	}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 	.content {
 		height: 100%;
 		position: relative;
 		overflow: hidden;
 	}
 
-	.mswiper {
-		height: 200rpx;
-	}
-
 	.mswiper-item {
 		width: 100%;
-		height: 200rpx;
 	}
 
 	.mswiper-content {
@@ -137,6 +132,7 @@
 
 		image {
 			width: 100%;
+			height: 300rpx;
 		}
 	}
 
