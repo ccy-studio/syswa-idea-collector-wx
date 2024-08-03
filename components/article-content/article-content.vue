@@ -25,6 +25,12 @@
 		</view>
 
 		<uni-section title="创意内容" type="line">
+			<template #right>
+				<view class="history-btn" @click="openHistory">
+					<uni-icons style="display: inline;" type="flag" size="20"></uni-icons>
+					<text style="display: inline;">提交记录</text>
+				</view>
+			</template>
 			<view class="html-v" v-if="isHtml()" v-html="props.data.content"></view>
 			<text user-select class="text-v" v-else v-text="props.data.content"></text>
 		</uni-section>
@@ -74,6 +80,12 @@
 
 	const onClickCover = () => {
 		emits('onClickCover', props.data.cover)
+	}
+
+	const openHistory = () => {
+		uni.navigateTo({
+			url: "/pages/history/history?id=" + props.data.id
+		})
 	}
 </script>
 
@@ -137,6 +149,15 @@
 					}
 				}
 			}
+		}
+
+		.history-btn {
+			box-shadow: 0 0 5px rgba($color: #d8d8d8, $alpha: 0.5);
+			padding: 10rpx;
+			border-radius: 10rpx;
+			background-color: white;
+			text-align: center;
+			color: #8f939c;
 		}
 	}
 </style>

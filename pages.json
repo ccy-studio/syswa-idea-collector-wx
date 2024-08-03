@@ -24,6 +24,12 @@
 		},
 		{
 			"path": "pages/create/create"
+		},
+		{
+			"path": "pages/history/history",
+			"style": {
+				"navigationBarTitleText": "提交记录"
+			}
 		}
 	],
 	"tabBar": {
