@@ -101,7 +101,7 @@
 				title: "贡献天马行空的创意想法"
 			},
 			{
-				img: "/static/swiper/sw_2.gif",
+				img: "/static/swiper/sw_2.png",
 				title: "2024星火计划"
 			}
 		],

@@ -146,7 +146,7 @@
 			return
 		}
 		uni.showLoading({
-			title: "正在AI生图" + aiRetryCount + "/s",
+			title: "正在AI生图" + state.aiRetryCount + "/s",
 			mask: true
 		})
 		get("/img/get-ai-info/" + state.id).then(res => {
