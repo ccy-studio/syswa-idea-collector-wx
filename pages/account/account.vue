@@ -23,6 +23,7 @@
 <script setup>
 	import {
 		get,
+		getImagePath
 	} from "@/util/api.js";
 
 	import {
@@ -63,7 +64,7 @@
 		if (!state.userInfo.avatar) {
 			return "/static/logo.png";
 		}
-		return state.userInfo.avatar;
+		return getImagePath(state.userInfo.avatar);
 	}
 
 	const getMyArticle = (pageSize, pageNo) => {

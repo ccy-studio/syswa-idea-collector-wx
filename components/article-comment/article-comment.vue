@@ -32,6 +32,7 @@
 		nextTick,
 		onMounted
 	} from "vue"
+import { getImagePath } from "../../util/api";
 
 	const emit = defineEmits(["onReply", 'onGive'])
 
@@ -54,7 +55,7 @@
 		if (!prors.obj.userAvatar || prors.obj.userAvatar == '') {
 			return "/static/default_head.png";
 		}
-		return prors.obj.userAvatar;
+		return getImagePath(prors.obj.userAvatar);
 	}
 
 	const onReplyClick = () => {

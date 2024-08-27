@@ -1,5 +1,6 @@
 import {
-	removeLocalUserInfo
+	removeLocalUserInfo,
+	compareVersion
 } from "./userinfo.js"
 
 export const base_url = "https://wx.saisaiwa.com";
@@ -9,6 +10,9 @@ export const base_url = "https://wx.saisaiwa.com";
  * 返回图片拼接路径
  */
 export const getImagePath = (key) => {
+	if(key.startsWith("http")){
+		return key;
+	}
 	return base_url + "/img?key=" + key;
 }
 
@@ -150,6 +154,11 @@ export const login = () => {
 export const getCurrentUserInfo = () => {
 	return new Promise((resovle, reject) => {
 		get("/wx/user/current").then(res => {
+			const version = uni.getSystemInfoSync().hostSDKVersion;
+			if (compareVersion(version, "2.27.1") >= 0) {
+				resovle(res);
+				return;
+			}
 			if (!res.nickName) {
 				//完善用户的信息
 				uni.getUserProfile({
@@ -177,6 +186,19 @@ export const getCurrentUserInfo = () => {
 				resovle(res);
 			}
 		}).catch(e => reject(e));
+	});
+}
+
+export const updateUserInfo = (avatarUrl, nickName) => {
+	return new Promise((resovle, reject) => {
+		get("/wx/user/update-userinfo", {
+			avatarUrl,
+			nickName
+		}).then(res => {
+			resovle(res);
+		}).catch(e => {
+			reject(e)
+		})
 	});
 }
 
