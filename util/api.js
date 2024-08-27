@@ -10,7 +10,10 @@ export const base_url = "https://wx.saisaiwa.com";
  * 返回图片拼接路径
  */
 export const getImagePath = (key) => {
-	if(key.startsWith("http")){
+	if (!key || key.length == 0) {
+		return;
+	}
+	if (key.startsWith("http")) {
 		return key;
 	}
 	return base_url + "/img?key=" + key;

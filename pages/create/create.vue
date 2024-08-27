@@ -130,6 +130,7 @@
 
 		try {
 			await get("/img/generator-ai/" + state.id)
+			uni.hideLoading()
 			requestAiResult()
 		} catch (e) {
 			console.error("提交AI任务失败：", e);
@@ -221,7 +222,8 @@
 
 		state.saveBtn = true;
 		uni.showLoading({
-			title: "请稍等..."
+			title: "请稍等...",
+			mask: true
 		})
 
 		post("/article/publish", {
@@ -232,6 +234,7 @@
 			comment: state.data.comment
 		}).then(res => {
 			if (state.imgSource == 0) {
+				uni.hideLoading();
 				showMessage("success", "提交成功")
 				setTimeout(() => {
 					uni.navigateBack()
@@ -244,10 +247,9 @@
 			}
 
 		}).catch(e => {
+			uni.hideLoading();
 			showMessage("error", "失败:" + e)
 			state.saveBtn = false;
-		}).finally(() => {
-			uni.hideLoading();
 		})
 	}
 
